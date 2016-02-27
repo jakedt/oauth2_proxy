@@ -28,6 +28,12 @@ func New(provider string, p *ProviderData) Provider {
 		return NewOIDCProvider(p)
 	case "google":
 		return NewGoogleProvider(p)
+	case "azure":
+		return NewAzureProvider(p)
+	case "cloudfoundry":
+		return NewCloudFoundryProvider(p)
+	case "gitlab":
+		return NewGitLabProvider(p)
 	default:
 		// TODO(philips): this should error out
 		return NewGoogleProvider(p)

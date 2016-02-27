@@ -11,6 +11,7 @@ type ProviderData struct {
 	DiscoveryURL   *url.URL
 	LoginURL       *url.URL
 	RedeemURL      *url.URL
+	ProtectedResource *url.URL
 	ProfileURL     *url.URL
 	ValidateURL    *url.URL
 	Scope          string

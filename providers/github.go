@@ -3,6 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -63,7 +64,7 @@ func (p *GitHubProvider) hasOrg(accessToken string) (bool, error) {
 		"limit":        {"100"},
 	}
 
-	endpoint := "https://api.github.com/user/orgs?" + params.Encode()
+	endpoint := p.ValidateURL.Scheme + "://"  + p.ValidateURL.Host + "/user/orgs?" + params.Encode()
 	req, _ := http.NewRequest("GET", endpoint, nil)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	resp, err := http.DefaultClient.Do(req)
@@ -113,7 +114,7 @@ func (p *GitHubProvider) hasOrgAndTeam(accessToken string) (bool, error) {
 		"limit":        {"100"},
 	}
 
-	endpoint := "https://api.github.com/user/teams?" + params.Encode()
+	endpoint := p.ValidateURL.Scheme + "://" + p.ValidateURL.Host + "/user/teams?" + params.Encode()
 	req, _ := http.NewRequest("GET", endpoint, nil)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	resp, err := http.DefaultClient.Do(req)
@@ -141,9 +142,12 @@ func (p *GitHubProvider) hasOrgAndTeam(accessToken string) (bool, error) {
 		presentOrgs[team.Org.Login] = true
 		if p.Org == team.Org.Login {
 			hasOrg = true
-			if p.Team == team.Slug {
-				log.Printf("Found Github Organization:%q Team:%q (Name:%q)", team.Org.Login, team.Slug, team.Name)
-				return true, nil
+			ts := strings.Split(p.Team, ",")
+			for _, t := range ts {
+				if t == team.Slug {
+					log.Printf("Found Github Organization:%q Team:%q (Name:%q)", team.Org.Login, team.Slug, team.Name)
+					return true, nil
+				}
 			}
 			presentTeams = append(presentTeams, team.Slug)
 		}
@@ -183,7 +187,7 @@ func (p *GitHubProvider) GetEmailAddress(s *SessionState) (string, error) {
 	params := url.Values{
 		"access_token": {s.AccessToken},
 	}
-	endpoint := "https://api.github.com/user/emails?" + params.Encode()
+	endpoint := p.ValidateURL.Scheme + "://" + p.ValidateURL.Host + p.ValidateURL.Path + "?" + params.Encode()
 	resp, err := http.DefaultClient.Get(endpoint)
 	if err != nil {
 		return "", err
